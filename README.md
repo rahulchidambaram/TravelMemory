@@ -459,13 +459,13 @@ Submit a travel entry through the UI and verify it appears in MongoDB Atlas:
 
 ```json
 {
-  "tripName": "Rahul's Goa Trip",
-  "startDateOfJourney": "2024-01-01",
-  "endDateOfJourney": "2024-01-05",
-  "nameOfHotels": "Taj Resort",
-  "placesVisited": "Baga Beach, Dudhsagar",
-  "totalCost": 25000,
-  "tripType": "leisure",
+  "tripName": "Kerala",
+  "startDateOfJourney": "2026-06-01",
+  "endDateOfJourney": "2026-06-05",
+  "nameOfHotels": "Blast Hotel",
+  "placesVisited": "Munnar, Varkala",
+  "totalCost": 20000,
+  "tripType": "backpacking",
   "featured": true
 }
 ```
