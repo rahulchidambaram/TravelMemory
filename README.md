@@ -97,6 +97,8 @@ Navigate to **AWS Console → EC2 → Launch Instance** with these settings:
 
 **User Data Script** (paste in *Advanced → User Data*):
 
+<img width="1901" height="475" alt="image" src="https://github.com/user-attachments/assets/9b90b544-cb0a-4d38-84e5-13e4b90b40d8" />
+
 ```bash
 #!/bin/bash
 sudo apt-get update
@@ -108,12 +110,14 @@ sudo git clone https://github.com/UnpredictablePrashant/TravelMemory
 ```
 
 This script automatically: updates packages → installs Node.js 18 → clones the TravelMemory repo on first boot.
+<img width="1646" height="700" alt="image" src="https://github.com/user-attachments/assets/bb798b51-7c64-424a-8850-b56df7024dbc" />
 
-> 📸 **Screenshot:** EC2 Launch Instance form with MERN_BE settings filled in
 
 ### 1.2 Configure the Backend `.env`
 
 SSH into the backend instance and create the environment file:
+
+<img width="936" height="844" alt="image" src="https://github.com/user-attachments/assets/f94b1812-164d-43d6-ad31-64ecaa3b2e55" />
 
 ```bash
 cd /home/ubuntu/TravelMemory/backend
@@ -144,7 +148,8 @@ Server started at http://localhost:3000
 
 Visiting `http://13.203.67.29:3000` should show `Cannot GET /` — confirming the Node.js server is running.
 
-> 📸 **Screenshot:** Browser showing `Cannot GET /` on port 3000 (server is live)
+<img width="689" height="239" alt="image" src="https://github.com/user-attachments/assets/24bc3435-1d11-4494-93c3-5e10cb865ea7" />
+
 
 ### 1.4 Whitelist Backend IP in MongoDB Atlas
 
@@ -155,7 +160,7 @@ Visiting `http://13.203.67.29:3000` should show `Cannot GET /` — confirming th
 5. Add `13.126.94.179` (backend replica, when scaling)
 6. Click **Confirm**
 
-> 📸 **Screenshot:** MongoDB Atlas Network Access panel showing whitelisted IPs
+<img width="1013" height="279" alt="image" src="https://github.com/user-attachments/assets/b06e4d95-6c26-412c-b2d6-8d81ccfb1153" />
 
 ### 1.5 Configure Nginx Reverse Proxy on Backend
 
@@ -194,7 +199,8 @@ sudo service nginx restart
 
 Visiting `http://13.203.67.29` (port 80) should now forward to the Node.js backend.
 
-> 📸 **Screenshot:** `sudo service nginx configtest` output showing `[ OK ]`
+<img width="829" height="197" alt="image" src="https://github.com/user-attachments/assets/9a2d5e29-ff44-4c15-a191-ab2612a78156" />
+
 
 ---
 
@@ -215,6 +221,8 @@ Navigate to **AWS Console → EC2 → Launch Instance**:
 Use the **same User Data script** from Task 1 to install Node.js and clone the repo.
 
 Result: Public IP `13.232.57.171`, Private IP `10.0.3.217`, AZ: `ap-south-1a`
+
+<img width="1650" height="714" alt="image" src="https://github.com/user-attachments/assets/c94b16fe-e9ad-48a1-8599-522427cef1d2" />
 
 ### 2.2 Configure Frontend to Connect to Backend
 
@@ -248,7 +256,8 @@ Local:   http://localhost:3000
 On Your Network: http://10.0.3.217:3000
 ```
 
-> 📸 **Screenshot:** TravelMemory app UI loaded in the browser at the frontend IP
+<img width="1006" height="406" alt="image" src="https://github.com/user-attachments/assets/9a363949-9825-4ff0-b4f4-98489344f3c0" />
+
 
 ### 2.4 Configure Nginx Reverse Proxy on Frontend
 
@@ -303,7 +312,8 @@ To ensure high availability, AMI snapshots of both instances were taken and repl
 4. Click **Create Image**
    - AMI ID: `ami-078a42232bf2556a8`
 
-> 📸 **Screenshot:** EC2 → AMIs list showing MERN_BE and MERN_FE AMIs
+<img width="1013" height="152" alt="image" src="https://github.com/user-attachments/assets/80e9275c-5cf1-4913-a127-aced3ab1a374" />
+
 
 ### 3.2 Launch Replica Instances from AMIs
 
@@ -321,7 +331,7 @@ To ensure high availability, AMI snapshots of both instances were taken and repl
 2. Name: `MERN_FE_2`, launch in `ap-south-1b`
    - Result: Public IP `13.206.185.103`, Private IP `10.0.4.22`
 
-> 📸 **Screenshot:** EC2 Instances list showing all four running instances (MERN_BE, MERN_BE_2, MERN_FE, MERN_FE_2)
+<img width="1013" height="231" alt="image" src="https://github.com/user-attachments/assets/be1c423d-093a-4aa2-b490-0dbe0be4be94" />
 
 ---
 
@@ -350,7 +360,7 @@ Navigate to **EC2 → Target Groups → Create target group**
 | Protocol | HTTP, Port 80 |
 | Registered targets | MERN_BE (ap-south-1a), MERN_BE_2 (ap-south-1b) |
 
-> 📸 **Screenshot:** Target groups list showing MERN-FE-TG and MERN-BE-TG with healthy targets
+<img width="967" height="144" alt="image" src="https://github.com/user-attachments/assets/58491703-f347-4f3e-8d59-6a2c4d9d3b93" />
 
 ### 4.2 Create Application Load Balancers
 
@@ -379,7 +389,7 @@ Navigate to **EC2 → Load Balancers → Create load balancer → Application Lo
 
 Verify both load balancers show **State = Active** in the AWS Console.
 
-> 📸 **Screenshot:** Load Balancers list showing both ALBs in Active state
+<img width="1012" height="186" alt="image" src="https://github.com/user-attachments/assets/052d5037-ced3-48f2-b9fe-30b358f37bc1" />
 
 ---
 
@@ -398,7 +408,7 @@ Effect:
 - `mern-travelmemory.duckdns.org` → Frontend Load Balancer → Frontend EC2 servers
 - `back.mern-travelmemory.duckdns.org` → Backend Load Balancer → Backend EC2 servers
 
-> 📸 **Screenshot:** Cloudflare DNS panel showing both CNAME records
+<img width="1525" height="302" alt="image" src="https://github.com/user-attachments/assets/26391f16-27d1-4951-bf8a-bd1370b18706" />
 
 ### 5.2 Update `url.js` on Both Frontend Instances
 
@@ -428,7 +438,8 @@ export const baseUrl = "http://back.mern-travelmemory.duckdns.org"
 
 Using the domain name ensures the frontend is decoupled from raw backend IPs — if instances change, only the load balancer needs updating.
 
-> 📸 **Screenshot:** `url.js` open in nano showing the domain-based `baseUrl`
+<img width="852" height="140" alt="image" src="https://github.com/user-attachments/assets/3d0ed30f-904c-4d74-bb41-e4ae67795cd3" />
+
 
 ---
 
@@ -440,7 +451,11 @@ Open a browser and navigate to: **http://mern-travelmemory.duckdns.org**
 
 Expected result: TravelMemory landing page with the travel entry form (Trip Name, Trip Date, Hotels, Places Visited, etc.)
 
-> 📸 **Screenshot:** TravelMemory application fully loaded via the Cloudflare domain
+
+
+
+
+
 
 ### End-to-End Data Flow Test
 
