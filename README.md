@@ -201,7 +201,6 @@ Visiting `http://13.203.67.29` (port 80) should now forward to the Node.js backe
 
 <img width="829" height="197" alt="image" src="https://github.com/user-attachments/assets/9a2d5e29-ff44-4c15-a191-ab2612a78156" />
 
-
 ---
 
 ## Task 2 — Frontend EC2 Setup
@@ -258,7 +257,6 @@ On Your Network: http://10.0.3.217:3000
 
 <img width="1006" height="406" alt="image" src="https://github.com/user-attachments/assets/9a363949-9825-4ff0-b4f4-98489344f3c0" />
 
-
 ### 2.4 Configure Nginx Reverse Proxy on Frontend
 
 Apply identical steps from [Task 1.5](#15-configure-nginx-reverse-proxy-on-backend) on the frontend instance.
@@ -288,8 +286,6 @@ sudo service nginx configtest && sudo service nginx restart
 
 Visiting `http://13.232.57.171` should now serve the React app on port 80.
 
-> 📸 **Screenshot:** TravelMemory UI accessible on port 80 via Nginx
-
 ---
 
 ## Task 3 — Scaling with Replica Instances
@@ -313,7 +309,6 @@ To ensure high availability, AMI snapshots of both instances were taken and repl
    - AMI ID: `ami-078a42232bf2556a8`
 
 <img width="1013" height="152" alt="image" src="https://github.com/user-attachments/assets/80e9275c-5cf1-4913-a127-aced3ab1a374" />
-
 
 ### 3.2 Launch Replica Instances from AMIs
 
@@ -451,11 +446,7 @@ Open a browser and navigate to: **http://mern-travelmemory.duckdns.org**
 
 Expected result: TravelMemory landing page with the travel entry form (Trip Name, Trip Date, Hotels, Places Visited, etc.)
 
-
-
-
-
-
+<img width="1448" height="1086" alt="image" src="https://github.com/user-attachments/assets/fa720281-b724-4484-9eb4-2f6cc6fdb481" />
 
 ### End-to-End Data Flow Test
 
@@ -479,19 +470,7 @@ Submit a travel entry through the UI and verify it appears in MongoDB Atlas:
 }
 ```
 
-> 📸 **Screenshot:** MongoDB Atlas Collections view showing the submitted trip document
-
----
-
-## Ports Reference
-
-| Layer | Technology | Internal Port | Exposed Via |
-|---|---|---|---|
-| Frontend | React (npm start) | 3000 | Nginx → port 80 |
-| Backend | Node.js (Express) | 3000 | Nginx → port 80 |
-| Database | MongoDB Atlas | 27017 (internal) | MongoDB URI over internet |
-| Load Balancer | AWS ALB | 80 | Public internet |
-| DNS / Proxy | Cloudflare | 80/443 | mern-travelmemory.duckdns.org |
+<img width="1551" height="947" alt="image" src="https://github.com/user-attachments/assets/459eeb9d-831d-4697-bc1d-926af5c21524" />
 
 ---
 
