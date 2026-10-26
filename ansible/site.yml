@@ -1,0 +1,133 @@
+- name: Database server
+  hosts: db
+  become: true
+  tasks:
+    - name: MongoDB apt key
+      apt_key:
+        url: https://www.mongodb.org/static/pgp/server-7.0.asc
+    - name: MongoDB apt repo
+      apt_repository:
+        repo: "deb [arch=amd64,arm64] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse"
+    - name: Install MongoDB
+      apt:
+        name: mongodb-org
+        update_cache: true
+    - name: Listen on private IP
+      lineinfile:
+        path: /etc/mongod.conf
+        regexp: '^\s*bindIp:'
+        line: "  bindIp: 127.0.0.1,{{ ansible_default_ipv4.address }}"
+    - name: Start MongoDB
+      service:
+        name: mongod
+        state: started
+        enabled: true
+    - name: Create admin and app users (once)
+      shell: |
+        sleep 5
+        mongosh --eval 'db.getSiblingDB("admin").createUser({user:"admin",pwd:"{{ admin_pass }}",roles:["root"]})'
+        mongosh --eval 'db.getSiblingDB("travelmemory").createUser({user:"tmapp",pwd:"{{ db_pass }}",roles:[{role:"readWrite",db:"travelmemory"}]})'
+        touch /var/lib/mongo_users_done
+      args:
+        creates: /var/lib/mongo_users_done
+    - name: Enable authentication
+      blockinfile:
+        path: /etc/mongod.conf
+        block: |
+          security:
+            authorization: enabled
+      notify: restart mongod
+    - name: Firewall - SSH
+      ufw: { rule: allow, port: "22", proto: tcp }
+    - name: Firewall - MongoDB from public subnet only
+      ufw: { rule: allow, port: "27017", proto: tcp, from_ip: 10.0.1.0/24 }
+    - name: Enable firewall
+      ufw: { state: enabled, policy: deny }
+    - name: Disable root and password SSH login
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: "{{ item.k }}"
+        line: "{{ item.v }}"
+      loop:
+        - { k: "^#?PermitRootLogin", v: "PermitRootLogin no" }
+        - { k: "^#?PasswordAuthentication", v: "PasswordAuthentication no" }
+      notify: restart ssh
+  handlers:
+    - name: restart mongod
+      service: { name: mongod, state: restarted }
+    - name: restart ssh
+      service: { name: ssh, state: restarted }
+
+- name: Web server
+  hosts: web
+  become: true
+  vars:
+    app_dir: /home/ubuntu/TravelMemory
+  tasks:
+    - name: NodeSource repo
+      shell: curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+      args:
+        creates: /etc/apt/sources.list.d/nodesource.list
+    - name: Install Node.js, nginx, git
+      apt:
+        name: [nodejs, nginx, git]
+        update_cache: true
+    - name: Clone application
+      become: false
+      git:
+        repo: https://github.com/rahulchidambaram/TravelMemory.git
+        dest: "{{ app_dir }}"
+        force: true
+    - name: Backend .env
+      copy:
+        dest: "{{ app_dir }}/backend/.env"
+        owner: ubuntu
+        mode: "0600"
+        content: |
+          MONGO_URI=mongodb://tmapp:{{ db_pass }}@{{ db_ip }}:27017/travelmemory?authSource=travelmemory
+          PORT=3001
+    - name: Point frontend at backend
+      copy:
+        dest: "{{ app_dir }}/frontend/src/url.js"
+        owner: ubuntu
+        content: |
+          export const baseUrl = "http://{{ web_ip }}:3001";
+    - name: Backend dependencies
+      become: false
+      shell: npm install
+      args: { chdir: "{{ app_dir }}/backend" }
+    - name: Frontend dependencies
+      become: false
+      shell: npm install
+      args: { chdir: "{{ app_dir }}/frontend" }
+    - name: Build frontend
+      become: false
+      shell: npm run build
+      args: { chdir: "{{ app_dir }}/frontend" }
+    - name: Publish frontend via nginx
+      shell: rm -rf /var/www/html/* && cp -r {{ app_dir }}/frontend/build/* /var/www/html/
+    - name: Install pm2
+      npm:
+        name: pm2
+        global: true
+    - name: Start backend
+      become: false
+      shell: pm2 restart backend || pm2 start index.js --name backend
+      args: { chdir: "{{ app_dir }}/backend" }
+    - name: Firewall rules
+      ufw: { rule: allow, port: "{{ item }}", proto: tcp }
+      loop: ["22", "80", "3001"]
+    - name: Enable firewall
+      ufw: { state: enabled, policy: deny }
+    - name: Disable root and password SSH login
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: "{{ item.k }}"
+        line: "{{ item.v }}"
+      loop:
+        - { k: "^#?PermitRootLogin", v: "PermitRootLogin no" }
+        - { k: "^#?PasswordAuthentication", v: "PasswordAuthentication no" }
+      notify: restart ssh
+  handlers:
+    - name: restart ssh
+      service: { name: ssh, state: restarted }
